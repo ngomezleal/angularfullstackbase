@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { Product, ProductService } from './services/product-service';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TelemetriaComponent } from './telemetria.component';
+import { DemoEstilos } from './componentes/demo-estilos/demo-estilos';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ReactiveFormsModule, TelemetriaComponent],
+  imports: [ReactiveFormsModule, TelemetriaComponent, DemoEstilos],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

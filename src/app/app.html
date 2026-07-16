@@ -1,20 +1,10 @@
-<div style="padding: 20px; font-family: sans-serif">
+<div class="container py-4">
   <h1>Día 1-10: Para Desarrolladores .NET</h1>
   <h2>{{ title }}</h2>
+
   <!-- Botón para montar/desmontar el componente hijo -->
-  <div style="margin-bottom: 15px">
-    <button
-      (click)="mostrarSensor.set(!mostrarSensor())"
-      style="
-        background-color: #555;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        cursor: pointer;
-        border-radius: 4px;
-        font-weight: bold;
-      "
-    >
+  <div class="mb-3">
+    <button (click)="mostrarSensor.set(!mostrarSensor())" class="btn btn-secondary fw-bold">
       {{
         mostrarSensor() ? '🔌 Desconectar Sensor (Destruir)' : '⚡ Conectar Sensor (Inicializar)'
       }}
@@ -26,141 +16,90 @@
     <app-telemetria></app-telemetria>
   }
 
-  <h3 style="margin: 0 0 5px 0">📡 Dispensadores Activos</h3>
-  <p style="margin: 0; font-size: 18px">
+  <h3 class="mb-1">📡 Dispensadores Activos</h3>
+  <p class="mb-0 fs-5">
     <strong>{{ totalDispensadores() }}</strong>
   </p>
 
-  <h3 style="margin: 0 0 5px 0">📡 Valor Financiero Total</h3>
-  <p style="margin: 0; font-size: 18px">
+  <h3 class="mb-1">📡 Valor Financiero Total</h3>
+  <p class="mb-0 fs-5">
     <strong>{{ valorTotalInventario() }}</strong>
   </p>
 
   <!-- Formulario Reactivo para agregar un nuevo dispensador -->
-  <form
-    [formGroup]="productForm"
-    (ngSubmit)="onSubmit()"
-    style="margin-bottom: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 8px"
-  >
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="mb-4 p-3 border rounded">
     <h3>Agregar Nuevo Dispensador</h3>
 
     <!-- Input para el Nombre -->
-    <div style="margin-bottom: 15px">
-      <label style="display: block; margin-bottom: 5px; font-weight: bold"
-        >Nombre del Producto:</label
-      >
+    <div class="mb-3">
+      <label class="form-label fw-bold">Nombre del Producto:</label>
       <input
         type="text"
         formControlName="name"
         placeholder="Ej. Dispensador Smart V2"
-        style="width: 100%; padding: 8px; box-sizing: border-box"
+        class="form-control"
       />
 
       <!-- Validación en tiempo real -->
       @if (productForm.get('name')?.invalid && productForm.get('name')?.touched) {
-        <span style="color: red; font-size: 12px; display: block; margin-top: 5px">
+        <span class="d-block mt-1 small text-danger">
           El nombre es obligatorio (mínimo 3 caracteres).
         </span>
       }
     </div>
 
     <!-- Input para el Precio -->
-    <div style="margin-bottom: 15px">
-      <label style="display: block; margin-bottom: 5px; font-weight: bold">Precio ($):</label>
+    <div class="mb-3">
+      <label class="form-label fw-bold">Precio ($):</label>
       <input
         type="number"
         formControlName="price"
         placeholder="Ej. 150"
-        style="width: 100%; padding: 8px; box-sizing: border-box"
+        class="form-control"
       />
 
       <!-- Validación en tiempo real -->
       @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
-        <span style="color: red; font-size: 12px; display: block; margin-top: 5px">
+        <span class="d-block mt-1 small text-danger">
           El precio es obligatorio y debe ser mayor a 0.
         </span>
       }
     </div>
 
     <!-- El botón se deshabilita automáticamente si el formulario no es válido -->
-    <button
-      type="submit"
-      style="
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        cursor: pointer;
-        border-radius: 4px;
-        width: 100%;
-      "
-    >
-      Guardar Dispensador
-    </button>
+    <button type="submit" class="btn btn-primary w-100">Guardar Dispensador</button>
   </form>
 
-  <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee" />
+  <hr class="my-4" />
 
   <!-- Listado de Productos Existente -->
   <h3>Inventario de Equipos</h3>
 
   @if (isLoading()) {
-    <p style="color: blue; font-weight: bold">Cargando productos desde el "servidor"...</p>
+    <p class="fw-bold text-primary">Cargando productos desde el "servidor"...</p>
   } @else {
     <h3>Lista de Productos Disponibles</h3>
 
-    <ul style="list-style-type: none; padding: 0">
+    <ul class="list-unstyled">
       @for (product of productsList(); track product.id) {
         <li
-          style="
-            padding: 15px;
-            margin-bottom: 8px;
-            background-color: #f4f4f4;
-            border-left: 5px solid #0078d4;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
+          class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-2 p-3 bg-light border-start border-5 border-primary rounded"
         >
           <!-- Bloque de Información del Producto (Izquierda) -->
           <div>
             <strong>{{ product.name }}</strong> <br />
-            <span style="color: #555">Precio: ${{ product.price }}</span>
+            <span class="text-body-secondary">Precio: ${{ product.price }}</span>
           </div>
 
           <!-- Bloque de Acciones (Derecha) -->
-          <div>
+          <div class="d-flex flex-wrap gap-2">
             <!-- Botón de Actualizar (Suma $10) -->
-            <button
-              (click)="onIncreasePrice(product)"
-              style="
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                cursor: pointer;
-                border-radius: 4px;
-                margin-right: 8px;
-                font-weight: bold;
-              "
-            >
+            <button (click)="onIncreasePrice(product)" class="btn btn-success btn-sm fw-bold">
               +$10
             </button>
 
             <!-- Botón de Eliminar -->
-            <button
-              (click)="onDelete(product.id)"
-              style="
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                cursor: pointer;
-                border-radius: 4px;
-                font-weight: bold;
-              "
-            >
+            <button (click)="onDelete(product.id)" class="btn btn-danger btn-sm fw-bold">
               Eliminar
             </button>
           </div>
@@ -173,3 +112,6 @@
 
   <p>El entorno base está listo. Revisa la consola del navegador presionando F12.</p>
 </div>
+
+<h1>Llamado a componente</h1>
+<app-demo-estilos></app-demo-estilos>

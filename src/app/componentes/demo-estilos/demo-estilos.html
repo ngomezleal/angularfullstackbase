@@ -1,0 +1,45 @@
+<!-- Contenedor rígido de ancho fijo (se romperá en móviles) -->
+<div style="background-color: #f5f5f7; padding: 35px; margin: 30px auto; border: 3px solid #ff0000; font-family: 'Courier New', Courier, monospace; width: 650px; border-radius: 8px; box-shadow: 5px 5px 15px #aaaaaa;">
+  
+  <h2 style="color: #0d6efd; text-align: center; text-decoration: underline; margin-bottom: 20px; font-weight: 900;">
+    Control de Flujo - Dispensador Automático (Estático)
+  </h2>
+  
+  <p style="font-size: 13px; color: #555555; text-align: justify; line-height: 1.5; margin-bottom: 25px;">
+    Este panel muestra la información de calibración de las válvulas de paso y los sensores de flujo en tiempo real. No modifique los valores si el sistema está en marcha.
+  </p>
+
+  <!-- Tabla rígida con estilos repetidos en cada celda -->
+  <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px;">
+    <tr style="background-color: #333333; color: white;">
+      <th style="border: 2px solid #000000; padding: 10px; text-align: left;">Parámetro</th>
+      <th style="border: 2px solid #000000; padding: 10px; text-align: left;">Medición</th>
+      <th style="border: 2px solid #000000; padding: 10px; text-align: left;">Estado</th>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #cccccc; padding: 10px; font-weight: bold; background-color: #ffffff;">Válvula de Entrada</td>
+      <td style="border: 1px solid #cccccc; padding: 10px; color: #198754; background-color: #ffffff;">8.5 Litros/Min</td>
+      <td style="border: 1px solid #cccccc; padding: 10px; background-color: #ffffff;">
+        <span style="background-color: #d1e7dd; color: #0f5132; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Estable</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #cccccc; padding: 10px; font-weight: bold; background-color: #f9f9f9;">Sensor de Presión</td>
+      <td style="border: 1px solid #cccccc; padding: 10px; color: #dc3545; background-color: #f9f9f9;">4.2 bar</td>
+      <td style="border: 1px solid #cccccc; padding: 10px; background-color: #f9f9f9;">
+        <span style="background-color: #f8d7da; color: #842029; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Alta Presión</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Botonera desorganizada con estilos inline repetidos y pesados -->
+  <div style="margin-top: 30px; text-align: center;">
+    <button style="background-color: #dc3545; color: #ffffff; padding: 12px 24px; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; margin-right: 15px; text-transform: uppercase;">
+      Parada de Emergencia
+    </button>
+    <button style="background-color: #0d6efd; color: #ffffff; padding: 12px 24px; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase;">
+      Calibrar Sensor
+    </button>
+  </div>
+  
+</div>
