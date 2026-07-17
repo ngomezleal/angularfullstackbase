@@ -1,15 +1,15 @@
 import os
 import re
-from crewai import Agent, Task, Crew, LLM
+from crewai import Agent, Task, Crew, Process, LLM
 
 # =====================================================================
-# 1. RUTAS DE TUS ARCHIVOS (Configuradas exactamente a tu proyecto)
+# 1. RUTAS DE TUS ARCHIVOS
 # =====================================================================
 RUTA_HTML_TARGET = "src/app/componentes/demo-sensor/demo-sensor.html"
 RUTA_STYLE_GUIDE = "style-guide.md"
 
 # =====================================================================
-# 2. CONFIGURACIÓN DEL MODELO LOCAL
+# 2. CONFIGURACIÓN DEL MODELO LOCAL (Usamos el potente 7b)
 # =====================================================================
 MODELO_LOCAL = "ollama/qwen2.5-coder:7b"
 BASE_URL_OLLAMA = "http://localhost:11434"
@@ -20,20 +20,16 @@ llm_local = LLM(
 )
 
 # =====================================================================
-# 3. CARGAR LOS ARCHIVOS UTILIZANDO LAS RUTAS EXACTAS
+# 3. CARGAR RECURSOS
 # =====================================================================
 def cargar_recursos():
-    # Verificar si los archivos realmente existen antes de continuar
     if not os.path.exists(RUTA_HTML_TARGET):
         raise FileNotFoundError(f"❌ Error: No se encontró el HTML en '{RUTA_HTML_TARGET}'")
     if not os.path.exists(RUTA_STYLE_GUIDE):
         raise FileNotFoundError(f"❌ Error: No se encontró la guía en '{RUTA_STYLE_GUIDE}'")
 
-    # Leer el HTML con malas prácticas
     with open(RUTA_HTML_TARGET, "r", encoding="utf-8") as f:
         html_sucio = f.read()
-        
-    # Leer las reglas de juego de la Guía de Estilos
     with open(RUTA_STYLE_GUIDE, "r", encoding="utf-8") as f:
         guia_estilos = f.read()
         
@@ -41,7 +37,7 @@ def cargar_recursos():
 
 
 # =====================================================================
-# 4. AGENTE Y TAREA (EL CORAZÓN DEL ORQUESTADOR)
+# 4. CONFIGURACIÓN DE LA TRIPULACIÓN MULTI-AGENTE
 # =====================================================================
 def ejecutar_refactorizacion():
     try:
@@ -50,71 +46,120 @@ def ejecutar_refactorizacion():
         print(e)
         return
 
-    # Definimos nuestro único programador experto para evitar dilución de atención en 1.5B
-    programador_frontend = Agent(
-        role="Especialista en Refactorización Angular y Bootstrap 5",
-        goal="Corregir archivos HTML eliminando malas prácticas y aplicando Bootstrap 5 de forma estricta.",
+    # -----------------------------------------------------------------
+    # Agente 1: El Auditor (Solo busca problemas)
+    # -----------------------------------------------------------------
+    auditor = Agent(
+        role="Auditor de Código y Estilos",
+        goal="Identificar estilos en línea, clases obsoletas y violaciones a la guía de estilos.",
         backstory=(
-            "Eres un desarrollador frontend experto. Tu única obsesión es el código limpio. "
-            "No toleras los estilos en línea (atributos 'style') ni las clases obsoletas. "
-            "Reescribes el HTML respetando al 100% el comportamiento original del componente."
+            "Eres un inspector de calidad de software sumamente estricto. Tu trabajo no es escribir código, "
+            "sino analizar el HTML original y compararlo con la guía de estilos para listar detalladamente "
+            "qué elementos violan las reglas (como los atributos 'style' o clases de Bootstrap incorrectas)."
         ),
         verbose=True,
         llm=llm_local
     )
 
-    # Creamos la tarea pasándole el HTML y la guía leídos
-    tarea_limpieza = Task(
-        description=(
-            f"Tu misión es reescribir el siguiente código HTML:\n\n"
-            f"--- HTML ORIGINAL ---\n"
-            f"{html_original}\n"
-            f"---------------------\n\n"
-            f"Debes aplicar estrictamente las reglas de esta guía de estilos:\n\n"
-            f"--- GUÍA DE ESTILOS (.md) ---\n"
-            f"{guia}\n"
-            f"-----------------------------\n\n"
-            f"INSTRUCCIONES CLAVE:\n"
-            f"1. Elimina CUALQUIER atributo 'style=...' (Prohibidos estilos inline).\n"
-            f"2. Utiliza únicamente clases nativas de Bootstrap 5 para márgenes, paddings, bordes y anchos.\n"
-            f"3. Mantén los textos y las etiquetas intactos. Solo modifica las clases CSS y elimina los estilos inline.\n"
-            f"4. Devuelve ÚNICAMENTE el código HTML limpio. No agregues explicaciones, notas ni introducciones."
+    # -----------------------------------------------------------------
+    # Agente 2: El Diseñador (Propone soluciones visuales)
+    # -----------------------------------------------------------------
+    disenador = Agent(
+        role="Diseñador UI Especialista en Bootstrap 5",
+        goal="Traducir los problemas detectados en soluciones visuales modernas usando Bootstrap 5.",
+        backstory=(
+            "Eres un experto en diseño de interfaces y Bootstrap 5. Tomas el reporte de errores del auditor "
+            "y decides exactamente qué clases modernas de Bootstrap 5 se deben aplicar para reemplazar "
+            "los estilos inline y hacer que el componente sea responsivo y limpio."
         ),
-        expected_output="El código HTML limpio y corregido, estructurado únicamente con Bootstrap 5.",
-        agent=programador_frontend
+        verbose=True,
+        llm=llm_local
     )
 
-    # Creamos la tripulación con el agente y su tarea
+    # -----------------------------------------------------------------
+    # Agente 3: El Programador Angular (Escribe el código final)
+    # -----------------------------------------------------------------
+    programador = Agent(
+        role="Programador Senior Angular",
+        goal="Escribir el HTML final limpio aplicando las propuestas de diseño y protegiendo la lógica de Angular.",
+        backstory=(
+            "Eres un desarrollador frontend senior muy minucioso. Tu trabajo es tomar las especificaciones "
+            "del diseñador y reescribir el HTML. Te aseguras de que no quede ningún estilo inline "
+            "y de que la estructura sea semánticamente perfecta, sin romper bindings ni directivas de Angular."
+        ),
+        verbose=True,
+        llm=llm_local
+    )
+
+    # =====================================================================
+    # 5. DEFINICIÓN DE TAREAS EN CADENA
+    # =====================================================================
+
+    # Tarea 1: Auditoría
+    tarea_auditoria = Task(
+        description=(
+            f"Analiza este HTML original:\n\n{html_original}\n\n"
+            f"Y compáralo con esta guía de estilos:\n\n{guia}\n\n"
+            f"Genera un reporte detallando cada línea o elemento que viole las reglas."
+        ),
+        expected_output="Un informe detallado en Markdown con los problemas encontrados.",
+        agent=auditor
+    )
+
+    # Tarea 2: Diseño (Toma como contexto implícito el resultado de la auditoría)
+    tarea_diseno = Task(
+        description=(
+            f"Toma el reporte del Auditor. Para cada problema detectado en el HTML original, "
+            f"propón la clase exacta de Bootstrap 5 que debe reemplazarlo. Asegura un diseño responsivo."
+        ),
+        expected_output="Una guía de reemplazos y clases de Bootstrap 5 recomendadas para el componente.",
+        agent=disenador
+    )
+
+    # Tarea 3: Programación (Aplica el diseño final al HTML original)
+    tarea_programacion = Task(
+        description=(
+            f"Toma las propuestas del Diseñador UI y reescribe por completo el HTML original:\n\n"
+            f"--- HTML ORIGINAL ---\n{html_original}\n---------------------\n\n"
+            f"Genera el código HTML final. Asegúrate de eliminar todos los atributos 'style' "
+            f"y de entregar únicamente el código limpio, sin explicaciones."
+        ),
+        expected_output="El código HTML limpio corregido de inicio a fin. Sin bloques de markdown extras.",
+        agent=programador
+    )
+
+    # =====================================================================
+    # 6. ORQUESTACIÓN SECUENCIAL
+    # =====================================================================
     orquestador = Crew(
-        agents=[programador_frontend],
-        tasks=[tarea_limpieza],
+        agents=[auditor, disenador, programador],
+        tasks=[tarea_auditoria, tarea_diseno, tarea_programacion],
+        process=Process.sequential,  # <-- ESTO ejecuta las tareas en orden (1 -> 2 -> 3)
         verbose=True
     )
 
-    print(f"🚀 Iniciando la limpieza de: {RUTA_HTML_TARGET} ...")
+    print(f"🚀 Iniciando flujo de trabajo multi-agente para: {RUTA_HTML_TARGET} ...")
     resultado_raw = orquestador.kickoff()
     
-    # Extraemos el código HTML limpio (en caso de que el LLM devuelva bloques ```html ... ```)
+    # Extraemos el código HTML final y lo limpiamos
     codigo_limpio = limpiar_resultado(str(resultado_raw))
     
-    # Guardamos el resultado directamente sobreescribiendo el archivo original en su ruta correspondiente
+    # Guardamos el archivo actualizado
     with open(RUTA_HTML_TARGET, "w", encoding="utf-8") as f:
         f.write(codigo_limpio)
         
-    print(f"\n✅ ¡Listo! El archivo '{RUTA_HTML_TARGET}' ha sido actualizado y corregido con éxito.")
+    print(f"\n✅ ¡Listo! El pipeline multi-agente ha finalizado. Archivo actualizado en: {RUTA_HTML_TARGET}")
 
 
 # =====================================================================
-# 5. FUNCIÓN AUXILIAR PARA EVITAR COMILLAS EXTRAÑAS DE MARKDOWN
+# 7. FUNCIÓN AUXILIAR DE LIMPIEZA
 # =====================================================================
 def limpiar_resultado(texto_raw: str) -> str:
-    """Extrae el HTML si el modelo lo envolvió en bloques de código de markdown"""
     texto = texto_raw.strip()
     match = re.search(r"```html\s*(.*?)\s*```", texto, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(1).strip()
     
-    # Remover marcas generales de bloques si existen
     lineas = texto.splitlines()
     lineas_filtradas = [l for l in lineas if not l.strip().startswith("```")]
     return "\n".join(lineas_filtradas).strip()
