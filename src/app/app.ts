@@ -4,11 +4,12 @@ import { Product, ProductService } from './services/product-service';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TelemetriaComponent } from './telemetria.component';
 import { DemoEstilos } from './componentes/demo-estilos/demo-estilos';
+import { DemoSensor } from './componentes/demo-sensor/demo-sensor';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ReactiveFormsModule, TelemetriaComponent, DemoEstilos],
+  imports: [ReactiveFormsModule, TelemetriaComponent, DemoEstilos, DemoSensor],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
