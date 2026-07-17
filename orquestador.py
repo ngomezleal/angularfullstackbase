@@ -11,7 +11,7 @@ RUTA_STYLE_GUIDE = "style-guide.md"
 # =====================================================================
 # 2. CONFIGURACIÓN DEL MODELO LOCAL
 # =====================================================================
-MODELO_LOCAL = "ollama/qwen2.5-coder:1.5b"
+MODELO_LOCAL = "ollama/qwen2.5-coder:7b"
 BASE_URL_OLLAMA = "http://localhost:11434"
 
 llm_local = LLM(
