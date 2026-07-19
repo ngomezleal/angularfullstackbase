@@ -91,6 +91,21 @@ def ejecutar_refactorizacion():
         llm=llm_local
     )
 
+    # -----------------------------------------------------------------
+    # Agente 4: El QA / Tester (Filtro de seguridad final)
+    # -----------------------------------------------------------------
+    qa_tester = Agent(
+        role="Ingenior de QA y Control de Calidad Frontend",
+        goal="Verificar que el HTML final cumpla estrictamente con la guía de estilos y no tenga errores sintácticos.",
+        backstory=(
+            "Eres un tester frontend implacable. Tu trabajo es revisar el código final del programador. "
+            "Si encuentras un solo estilo inline, una clase obsoleta o una etiqueta mal cerrada, "
+            "rechazarás el entregable y reportarás el fallo. Tu palabra es la última antes de ir a producción."
+        ),
+        verbose=True,
+        llm=llm_local
+    )
+
     # =====================================================================
     # 5. DEFINICIÓN DE TAREAS EN CADENA
     # =====================================================================
@@ -128,12 +143,26 @@ def ejecutar_refactorizacion():
         agent=programador
     )
 
+    # Tarea 4: Control de Calidad (Toma como contexto directo el HTML del programador)
+    tarea_qa = Task(
+        description=(
+            f"Toma el código HTML final generado por el Programador y realiza una auditoría de cierre.\n"
+            f"Verifica de forma estricta contra esta guía:\n\n{guia}\n\n"
+            f"REGLAS DE VALIDACIÓN:\n"
+            f"1. Si queda ALGÚN atributo 'style=...', elimínalo de inmediato.\n"
+            f"2. Asegúrate de que las etiquetas estén perfectamente estructuradas y cerradas.\n"
+            f"3. Tu salida debe ser ÚNICAMENTE el código HTML 100% aprobado y limpio, listo para guardarse."
+        ),
+        expected_output="El código HTML definitivo, verificado, limpio y libre de errores o estilos inline.",
+        agent=qa_tester
+    )
+
     # =====================================================================
     # 6. ORQUESTACIÓN SECUENCIAL
     # =====================================================================
     orquestador = Crew(
-        agents=[auditor, disenador, programador],
-        tasks=[tarea_auditoria, tarea_diseno, tarea_programacion],
+        agents=[auditor, disenador, programador, qa_tester],
+        tasks=[tarea_auditoria, tarea_diseno, tarea_programacion, tarea_qa],
         process=Process.sequential,  # <-- ESTO ejecuta las tareas en orden (1 -> 2 -> 3)
         verbose=True
     )
